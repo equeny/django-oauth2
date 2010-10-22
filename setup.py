@@ -25,7 +25,7 @@ setup(
     name = 'django-oauth2',
     version = version,
     url = 'http://code.google.com/p/django-oauth2/',
-	download_url = 'http://code.google.com/p/django-oauth2/downloads/',
+	download_url = 'http://pypi.python.org/pypi/django-oauth2/',
     license = '?',
     description = 'OAuth 2 application for Django.',
     author = 'ShiningPanda',
@@ -34,11 +34,22 @@ setup(
     include_package_data = True,
     zip_safe = False,
     install_requires = [
-        'Django >= 1.2.3',
-        'South == 0.7.2',
+        'Django>=1.2.3',
+        'South==0.7.2',
     ],
     tests_require = [
-        'Nosango >= 0.1.0',               
+        'Nosango>=0.1.0',               
+    ],
+    extras_require = {
+        'PISTON': [
+            'django-piston>=0.2.2',         
+        ],            
+    },
+    setup_requires = [
+        'collective.dist>=0.2.5',
+    ],
+    dependency_links = [
+        'http://dev.shiningpanda.com/simple/Nosango/'                  
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
@@ -47,5 +58,6 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Natural Language :: English',
-    ]
+    ],
+    test_suite = 'nose.collector',
 )
