@@ -7,6 +7,7 @@ import urlparse
 import nosango.cases
 
 import django.test.client
+from django.utils import simplejson
 from django.core.urlresolvers import reverse
 from django_oauth2.authorize import authorization_grant_response
 
@@ -25,14 +26,13 @@ class TestCase(nosango.cases.TestCase):
         # Create a client
         self.client = django.test.client.Client()
     
-    def assertAuthorizeError(self, data, error, error_description=None, error_uri=None, redirect_uri=None):
-        response = self.client.get(reverse('django_oauth2_authorize'), data=data)
+    def assertAuthorizeError(self, response, redirect_uri, error, error_description=None, error_uri=None, state=None):
         self.assertEquals(302, response.status_code)
         self.assertTrue(response.has_header('Location'))
         location = response['Location']
         location_parts = urlparse.urlparse(location)
         location_qs = urlparse.parse_qs(location_parts.query)
-        redirect_uri_parts = urlparse.urlparse(redirect_uri or data['redirect_uri'])
+        redirect_uri_parts = urlparse.urlparse(redirect_uri)
         self.assertEquals(redirect_uri_parts.scheme, location_parts.scheme)
         self.assertEquals(redirect_uri_parts.netloc, location_parts.netloc)
         self.assertEquals(redirect_uri_parts.path, location_parts.path)
@@ -42,9 +42,9 @@ class TestCase(nosango.cases.TestCase):
             self.assertTrue(key in ['error', 'error_description', 'error_uri', 'state'])
         self.assertTrue(location_qs.has_key('error'))
         self.assertEquals([error, ], location_qs['error'])
-        if data.has_key('state'):
+        if state is not None:
             self.assertTrue(location_qs.has_key('state'))
-            self.assertEquals([data['state'], ], location_qs['state'])
+            self.assertEquals([state, ], location_qs['state'])
         else: self.assertFalse(location_qs.has_key('state'))
         if error_description is not None:
             self.assertTrue(location_qs.has_key('error_description'))
@@ -52,6 +52,19 @@ class TestCase(nosango.cases.TestCase):
         if error_uri is not None:
             self.assertTrue(location_qs.has_key('error_uri'))
             self.assertEquals([error_description, ], location_qs['error_uri'])
+    
+    def assertTokenError(self, response, error, error_description=None, error_uri=None, status_code=400):
+        self.assertEquals(status_code, response.status_code)
+        self.assertEquals('application/json', response['Content-Type'])
+        self.assertEquals('no-store', response['Cache-Control'])
+        data = simplejson.loads(response.content)
+        self.assertTrue(data.has_key('error'))
+        if error_description is not None:
+            self.assertTrue(data.has_key('error_description'))
+            self.assertEquals(error_description, data['error_description'])
+        if error_uri is not None:
+            self.assertTrue(data.has_key('error_uri'))
+            self.assertEquals(error_description, data['error_uri'])
     
     def assertGrantCode(self, authorization_request):
         response = authorization_grant_response(authorization_request, 'foo')
@@ -65,6 +78,9 @@ class TestCase(nosango.cases.TestCase):
         response = authorization_grant_response(authorization_request, 'foo')
         self.assertEquals(302, response.status_code)
     
+     
+    def assertFoo(self, response):
+        pass
      
 def main():
     '''Run test'''

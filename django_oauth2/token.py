@@ -3,7 +3,7 @@ import urllib
 import logging
 import urlparse
 
-from django.shortcuts import render_to_response
+#from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
@@ -13,7 +13,7 @@ from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
 from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
 from django_oauth2 import settings as appsettings
 from django_oauth2 import tools as oauth2_tools
-from django_oauth2 import consts as oauth2_consts
+from django_oauth2 import consts as appconsts
 from django_oauth2 import OAuth2Error, MissRedirectUri
 from django_oauth2.authentication import authenticate
 from django.contrib.sites.models import Site
@@ -56,11 +56,11 @@ class InvalidScope(AccessTokenError):
 
 def getvalidator(grant_type):
     return {
-        oauth2_consts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE: AuthorizationCodeType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_PASSWORD: PasswordType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_ASSERTION: AssertionType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_REFRESH_TOKEN: RefreshTokenType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_NONE: NoneType,                               
+        appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE: AuthorizationCodeType,
+        #appconsts.ACCESS_GRANT_TYPE_PASSWORD: PasswordType,
+        #appconsts.ACCESS_GRANT_TYPE_ASSERTION: AssertionType,
+        #appconsts.ACCESS_GRANT_TYPE_REFRESH_TOKEN: RefreshTokenType,
+        #appconsts.ACCESS_GRANT_TYPE_NONE: NoneType,                               
     }.get(grant_type)
 
 class AccessTokenProvider(object):
@@ -84,10 +84,10 @@ class AccessTokenProvider(object):
         # Check response type
         if self.grant_type is None:
             raise InvalidRequest(_('grant type required'))
-        if self.grant_type not in oauth2_consts.ACCESS_GRANT_TYPES:
+        if self.grant_type not in appconsts.ACCESS_GRANT_TYPES:
             raise UnsupportedGrantType(_('No such grant type: %(grant_type)s') % {'grant_type': self.grant_type, })
 
-        self.validator = getvalidator(self.grant_type)
+        self.validator = getvalidator(self.grant_type)(self.request)
         
         if self.client_id is None:
             raise InvalidRequest(_('No client_id'))
@@ -95,6 +95,9 @@ class AccessTokenProvider(object):
         except Client.DoesNotExist:
             raise InvalidClient(_("client_id %(client_id)s doesn't exist") % {'client_id': self.client_id, })
         # Redirect URI
+        
+        self.validator.validate(self.client)
+        
 
     def deny(self, request, error):
         data = {'error': error.error,
@@ -135,7 +138,7 @@ class AccessGrantType(object):
 class AuthorizationCodeType(AccessGrantType):
     
     def __init__(self, request):
-        super(AuthorizationCodeType).__init__(request)
+        super(AuthorizationCodeType, self).__init__(request)
         self.codekey = self.request.POST.get('code')
         self.redirect_uri = self.request.POST.get('redirect_uri')
         self.code = None

@@ -9,7 +9,11 @@ from django_oauth2.models import Client, AccessRange
 
 class TestAuthorizeInvalid(test_django_oauth2.TestCase):
     
+    def get(self, data):
+        return self.client.get(reverse('django_oauth2_authorize'), data=data)
+    
     def test_no_response_type(self):
+        redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
             name='test',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
@@ -18,9 +22,13 @@ class TestAuthorizeInvalid(test_django_oauth2.TestCase):
             'client_id': c.key,
             'redirect_uri': 'http://www.google.fr'
         }
-        self.assertAuthorizeError(data, error='invalid_request')
+        self.assertAuthorizeError(
+            response=self.get(data),
+            redirect_uri=
+            error='invalid_request')
     
     def test_invalid_response_type(self):
+        redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
             name='test',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
@@ -55,7 +63,19 @@ class TestAuthorizeInvalid(test_django_oauth2.TestCase):
             'redirect_uri': 'http://www.google.fr'
         }
         self.assertAuthorizeError(data, error='invalid_request')
-        
+
+    def test_invalid_client_id(self):
+        c = Client.objects.create(
+            name='test',
+            authorized_reponse_types=appconsts.RESPONSE_TYPES
+        )
+        data = {
+            'response_type': appconsts.RESPONSE_TYPE_CODE,
+            'client_id': 'quinexistepas',
+            'redirect_uri': 'http://www.google.fr'
+        }
+        self.assertAuthorizeError(data, error='invalid_request')
+
     def test_no_redirect_uri(self):
         c = Client.objects.create(
             name='test',

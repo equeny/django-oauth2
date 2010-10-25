@@ -13,7 +13,7 @@ from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
 from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
 from django_oauth2 import settings as appsettings
 from django_oauth2 import tools as oauth2_tools
-from django_oauth2 import consts as oauth2_consts
+from django_oauth2 import consts as appconsts
 from django_oauth2 import OAuth2Error, MissRedirectUri
 from django_oauth2.authentication import authenticate
 from django.contrib.sites.models import Site
@@ -23,6 +23,7 @@ from django.utils import simplejson
 
 from django_oauth2.tools import escape
 from django import forms
+from django_oauth2.tools import generate_timestamp
 
 log = logging.getLogger(__name__)
 
@@ -36,28 +37,28 @@ ACCESS_ERRORS = {
 
 
 
-class AccessError(OAuth2Error):
+class ResourceError(OAuth2Error):
     error = None
 
-class InvalidRequest(AccessError):
+class InvalidRequest(ResourceError):
     error = 'invalid_request'
 
-class InvalidToken(AccessError):
+class InvalidToken(ResourceError):
     error = 'invalid_request'
 
-class ExpiredToken(AccessError):
+class ExpiredToken(ResourceError):
     error = 'expired_token'
 
-class InsufficientScope(AccessError):
+class InsufficientScope(ResourceError):
     error = 'insufficient_scope'
 
 def getvalidator(grant_type):
     return {
-        oauth2_consts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE: AuthorizationCodeType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_PASSWORD: PasswordType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_ASSERTION: AssertionType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_REFRESH_TOKEN: RefreshTokenType,
-        #oauth2_consts.ACCESS_GRANT_TYPE_NONE: NoneType,                               
+        appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE: AuthorizationCodeType,
+        #appconsts.ACCESS_GRANT_TYPE_PASSWORD: PasswordType,
+        #appconsts.ACCESS_GRANT_TYPE_ASSERTION: AssertionType,
+        #appconsts.ACCESS_GRANT_TYPE_REFRESH_TOKEN: RefreshTokenType,
+        #appconsts.ACCESS_GRANT_TYPE_NONE: NoneType,                               
     }.get(grant_type)
 
 class AccessTokenProvider(object):
@@ -66,7 +67,19 @@ class AccessTokenProvider(object):
         self.request = request
 
     def validate(self):
-        pass
+        query_token = self.analyze_query()
+        header_token = self.analyze_header()
+        body_token = self.analyze_body()
+        # Check that only one
+        
+        self.oauth_token = query_token or header_token or body_token
+        
+        try: access_token = AccessToken.objects.get(token=self.oauth_token)
+        except AccessToken.DoesNotExist:
+            raise InvalidToken(_('The access token provided is invalid.'))
+        
+        if access_token.timestamp < generate_timestamp() - appsettings.ACCESS_TOKEN_EXPIRY:
+            raise ExpiredToken(_('The access token provided has expired.'))
 
     def analyze_header(self):
         auth_header = self.request.META.get('HTTP_AUTHORIZATION')
@@ -97,8 +110,8 @@ class AccessTokenProvider(object):
         if self.request.GET.get('oauth_signature_method') is not None:
             raise
         token = self.request.GET.get('oauth_token')
-        if token is None:
-            raise
+        #if token is None:
+        #    raise
         #TODO: check the last one
         #pass
         #parse_qsl((query_string or ''), True):
@@ -114,14 +127,16 @@ class AccessTokenProvider(object):
 
     def analyze_body(self):
         class OAuthTokenForm(forms.Form):
-            oauth_token = forms.CharField(oauth2_consts.ACCESS_TOKEN_LENGTH, oauth2_consts.ACCESS_TOKEN_LENGTH)
-
+            oauth_token = forms.CharField(required=True)
+        form = OAuthTokenForm(self.request.POST)
+        if form.is_valid():
+            return form.cleaned_data['oauth_token']
 
     def deny(self, request, error):
         
         include_error = ( self.oauth_token is not None )
         
-        auth_header = 'OAuth realm="%s"' % appsettings.AUTHENTICATE_REALM
+        auth_header = "OAuth realm='%s'" % appsettings.AUTHENTICATE_REALM
         data = {}
         if include_error:
             data = [
@@ -139,20 +154,8 @@ class AccessTokenProvider(object):
     
     def process(self):
         try: self.validate()
-        except AccessTokenError, error:
+        except ResourceError, error:
             return self.deny(self.request, error)
-        access_token = AccessToken.objects.create(self.validator.refreshable())
-        data = {
-            'access_token': access_token.token,
-            'expire_in': appsettings.ACCESS_TOKEN_EXPIRY,
-            }
-        if access_token.refresh_token:
-            data['refresh_token'] = access_token.refresh_token
-        if self.scope:
-            data['scope'] = ' '.join(self.scope)
-        response = HttpResponse(content=simplejson.dumps(data), content_type='application/json')
-        response['Content-Type'] = 'no-store'
-        return response
 
 class AccessGrantType(object):
     def __init__(self, request):

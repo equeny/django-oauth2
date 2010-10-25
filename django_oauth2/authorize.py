@@ -184,7 +184,7 @@ class Request(Authorization):
             if len(difference) != 0:
                 raise InvalidScope(_("Following access ranges doesn't exist: %(access_ranges)s") % {'access_ranges': ', '.join(difference), })
 
-def authorization_request(request):
+def handle_authorization_request(request):
     return Request(request).process()
 
 class Response(Authorization):

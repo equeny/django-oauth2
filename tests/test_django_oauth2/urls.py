@@ -5,6 +5,7 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('',
     # Registration
     (r'', include('django_oauth2.urls')),
+    url(r'^resource/$', 'test_django_oauth2.views.handle', name='resource'),
 )
 
 

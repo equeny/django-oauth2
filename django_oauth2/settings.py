@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+from django import get_version
 from django.conf import settings
 
 from django_oauth2 import consts as appconsts
@@ -20,6 +21,6 @@ ACCESS_TOKEN_EXPIRY = getattr(settings, 'OAUTH2_ACCESS_TOKEN_EXPIRY', 3600)
 
 ALLOW_REFRESH_TOKEN = getattr(settings, 'OAUTH2_ALLOW_REFRESH_TOKEN', True)
 
-AUTHENTICATE_REALM = getattr(settings, 'OAUTH2_AUTHENTICATE_REALM', None)
+AUTHENTICATE_REALM = getattr(settings, 'OAUTH2_AUTHENTICATE_REALM', 'Django/%s' % get_version())
 
 SCOPE_BACKEND = getattr(settings, 'OAUTH2_SCOPE_BACKEND', 'django_oauth2.scope.db.Backend')
