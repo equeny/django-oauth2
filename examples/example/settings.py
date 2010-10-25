@@ -72,6 +72,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django_oauth2',
     'example.client',
+    'example.api',
 )
 
 # List of locations of the template source files, in search order.

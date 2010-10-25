@@ -30,9 +30,9 @@ class Backend(IBackend):
         user = request.user
         if not user.is_authenticated():
             return handle_login_request(request, authorization_request_key=authorization_request.key)
-        if True:
-            return handle_scope_request(request, authorization_request_key=authorization_request.key)
-        return authorization_grant()
+        #if True:
+        #    return handle_scope_request(request, authorization_request_key=authorization_request.key)
+        return authorization_grant_response(authorization_request, '')
 
 STEP_LOGIN = 'login'
 STEP_SCOPE = 'scope'
@@ -89,6 +89,12 @@ def handle_login_response(request):
         auth_login(request, form.get_user())
         if request.session.test_cookie_worked():
             request.session.delete_test_cookie()
+        if True:
+            authorization_request = get_object_or_404(
+                AuthorizationRequest,
+                key=form.cleaned_data.get('authorization_request_key')
+            )
+            return authorization_grant_response(authorization_request, '')
         return handle_scope_request(request, form.cleaned_data.get('authorization_request_key'))
     return generate_login_page(request, form)
 
@@ -104,7 +110,7 @@ def handle_scope_request(request, authorization_request_key):
         'step': STEP_SCOPE,
         'authorization_request_key': authorization_request_key,
         'status': STATUS_GRANT,
-        'scope': authorization_request.scope.split(),
+        'scope': ''#authorization_request.scope.split(),
         }
     form = ScopeForm(authorization_request, initial=data)
     return generate_scope_page(request, form, authorization_request)

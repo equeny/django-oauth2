@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
-from django.http import HttpResponse
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
 
-def handle_home(request):
-    return HttpResponse('<h1>It works!</h1>')
+def handle(request):
+    return render_to_response('client.html', RequestContext(request, {}))

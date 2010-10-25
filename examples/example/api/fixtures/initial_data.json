@@ -21,11 +21,11 @@
         "pk": 1, 
         "model": "django_oauth2.client", 
         "fields": {
-            "name": "c", 
+            "name": "test", 
             "description": "Test client.",
-            "key": "k",
-            "secret": "s",
-            "redirect_uri": "http://localhost:8000",
+            "key": "key",
+            "secret": "secret",
+            "redirect_uri": "http://localhost:8000/client/",
             "authorized_reponse_types": 7
         }
     }

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>My Client</title>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript">
+  function getAccessToken() {
+    frag = window.location.hash.substring(1);
+    qs = frag.split("&");
+    for (var i=0;i<qs.length;i++) {
+      var kv = qs[i].split("=");
+      if (kv[0] == "access_token") {
+        return kv[1];
+      }
+    } 
+  }
+$(document).ready(function() {
+  token = getAccessToken();
+  if(!token) {
+    window.location = '{% url django_oauth2_authorize %}?redirect_uri=' + window.location + "&client_id=key&response_type=token";
+  } else {
+	jQuery.ajax({
+	  url: '{% url example-api-date %}',
+	  method: 'GET',
+	  beforeSend : function(req) {
+	    req.setRequestHeader('Authorization', 'OAuth ' + token);
+	  },
+	  success: function(data, status, xhr) {
+	    $("#date").append("<p>" + data + "</p>");
+	  },
+	  error: function(error_type, xhr, exc) {
+	    $("#date").append("<p style='color=red'>error!</p>");
+	  }
+    });
+  }
+});
+jQuery.ajax({
+  url: '{% url example-api-date %}',
+  method: 'GET',
+  beforeSend : function(req) {
+    req.setRequestHeader('Authorization', 'OAuth foobar');
+  },
+  success: function(data, status, xhr) {
+	$("#date").append(data + "<br/>");
+  },
+  error: function(error_type, xhr, exc) {
+    //alert(error_type);
+    //alert(xhr);
+  }
+});
+</script>   
+</head>
+<body>
+<div id="date"></div>
+</body>
+</html>

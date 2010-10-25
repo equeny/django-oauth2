@@ -65,6 +65,7 @@ class AccessTokenProvider(object):
 
     def __init__(self, request):
         self.request = request
+        self.oauth_token = None
 
     def validate(self):
         query_token = self.analyze_query()

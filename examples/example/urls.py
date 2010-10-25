@@ -17,9 +17,11 @@ production = patterns('',
     # Get the administration site
     (r'^admin/(.*)', admin.site.root),
     # General tools
-    (r'oauth2', include('django_oauth2.urls')),
+    (r'oauth2/', include('django_oauth2.urls')),
     # General tools
-    (r'client', include('client.urls')),
+    (r'client/', include('client.urls')),
+    # General tools
+    (r'api/', include('api.urls')),
 )
 
 # Get the right URL pattern

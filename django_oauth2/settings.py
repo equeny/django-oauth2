@@ -4,6 +4,10 @@ from django.conf import settings
 
 from django_oauth2 import consts as appconsts
 
+
+ERROR_DESCRIPTION = getattr(settings, 'OAUTH2_ERROR_DESCRIPTION', True)
+ERROR_URI = getattr(settings, 'OAUTH2_ERROR_URI', True)
+
 RESPONSE_TYPES = getattr(settings, 'OAUTH2_RESPONSE_TYPES', appconsts.RESPONSE_TYPES)
 
 # Seconds
