@@ -49,7 +49,7 @@ setup(
         'collective.dist>=0.2.5',
     ],
     dependency_links = [
-        'http://dev.shiningpanda.com/pypi/nosango/'                  
+        'https://dev.shiningpanda.com/pypi/simple/nosango/'                  
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
