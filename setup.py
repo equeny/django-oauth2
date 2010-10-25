@@ -24,10 +24,10 @@ timestamp = %(timestamp)s
 setup(
     name = 'django-oauth2',
     version = version,
+    description = 'OAuth 2 application for Django.',
     url = 'http://code.google.com/p/django-oauth2/',
 	download_url = 'http://pypi.python.org/pypi/django-oauth2/',
     license = '?',
-    description = 'OAuth 2 application for Django.',
     author = 'ShiningPanda',
     author_email = 'developers@shiningpanda.com',
     packages = find_packages(),
@@ -49,7 +49,7 @@ setup(
         'collective.dist>=0.2.5',
     ],
     dependency_links = [
-        'http://dev.shiningpanda.com/simple/Nosango/'                  
+        'http://dev.shiningpanda.com/pypi/nosango/'                  
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
