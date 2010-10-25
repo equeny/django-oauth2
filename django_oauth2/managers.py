@@ -2,17 +2,17 @@ import time
 from django.db import models
 from django.contrib.auth.models import User
 
-from django_oauth2.conf import settings as oauth2_settings
-from django_oauth2 import consts as oauth2_consts
+from django_oauth2 import settings as appsettings
+from django_oauth2 import consts as appconst
 from django_oauth2.tools import generate_unique_key_secret, generate_unique_key, generate_timestamp
 
 class ClientManager(models.Manager):
     
-    def create(self, name, authorized_reponse_types, description='', redirect_uri=None, user=None):
+    def create(self, name, authorized_reponse_types, description=None, redirect_uri=None):
         key, secret = generate_unique_key_secret(
             self.model,
-            key_length=oauth2_consts.CLIENT_KEY_LENGTH,
-            secret_length=oauth2_consts.CLIENT_SECRET_LENGTH,
+            key_length=appconst.CLIENT_KEY_LENGTH,
+            secret_length=appconst.CLIENT_SECRET_LENGTH,
             )
         client = self.model(
             name=name,
@@ -20,7 +20,7 @@ class ClientManager(models.Manager):
             key=key,
             secret=secret,
             redirect_uri=redirect_uri,
-            user=user,
+            #user=user,
             )
         client.authorize_response_types(*authorized_reponse_types)
         client.save()
@@ -31,7 +31,7 @@ class AuthorizationRequestManager(models.Manager):
     def create(self, response_type, client, redirect_uri=None, state=None, scope=None):
         key = generate_unique_key(
             self.model,
-            key_length=oauth2_consts.AUTHORIZATION_REQUEST_KEY_LENGTH,
+            key_length=appconst.AUTHORIZATION_REQUEST_KEY_LENGTH,
             )
         authorization_request = self.model(
             key = key,
@@ -40,7 +40,7 @@ class AuthorizationRequestManager(models.Manager):
             redirect_uri = redirect_uri,
             state = state,
             timestamp = generate_timestamp(),
-            scope = ' '.join(scope),
+            #scope = ' '.join(scope),
             )
         authorization_request.save()
         return authorization_request
@@ -50,7 +50,7 @@ class CodeManager(models.Manager):
     def create(self, client, redirect_uri, scope=None):
         key = generate_unique_key(
             self.model,
-            key_length=oauth2_consts.CODE_KEY_LENGTH,
+            key_length=appconst.CODE_KEY_LENGTH,
             )
         code = self.model(
             key = key,
@@ -66,15 +66,17 @@ class CodeManager(models.Manager):
 class AccessTokenManager(models.Manager):
 
     def create(self, refreshable=True):
-        token = generate_unique_key_secret(
+        token = generate_unique_key(
             self.model,
-            key_length=oauth2_consts.ACCESS_TOKEN_LENGTH,
+            key_length=appconst.ACCESS_TOKEN_LENGTH,
+            key_field='token',
             )
         refresh_token = None
-        if refreshable and oauth2_settings.ALLOW_REFRESH_TOKEN:
-            refresh_token = generate_unique_key_secret(
+        if refreshable and appsettings.ALLOW_REFRESH_TOKEN:
+            refresh_token = generate_unique_key(
                 self.model,
-                key_length=oauth2_consts.REFRESH_TOKEN_LENGTH,
+                key_length=appconst.REFRESH_TOKEN_LENGTH,
+                key_field='refresh_token',
             )
         access_token = self.model(
             token = token,

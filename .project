@@ -3,6 +3,8 @@
 	<name>django-oauth2</name>
 	<comment></comment>
 	<projects>
+		<project>python26</project>
+		<project>virtualenv26</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

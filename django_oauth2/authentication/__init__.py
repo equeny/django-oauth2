@@ -2,7 +2,7 @@
 from django.utils.importlib import import_module
 from django.core.exceptions import ImproperlyConfigured
 
-from django_oauth2.conf import settings as oauth2_settings
+from django_oauth2 import settings as appsettings
 
 def load_backend(path):
     i = path.rfind('.')
@@ -20,4 +20,4 @@ def load_backend(path):
     return cls()
 
 def authenticate(request, authorization_request):
-    return load_backend(oauth2_settings.AUTHENTICATION_BACKEND).authenticate(request, authorization_request)
+    return load_backend(appsettings.AUTHENTICATION_BACKEND).authenticate(request, authorization_request)

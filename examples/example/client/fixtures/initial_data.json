@@ -1,0 +1,32 @@
+[
+    {
+        "pk": 1, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "admin", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2010-10-25 12:22:12", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "sha1$e97bb$051fbe229f3afd3333f56260e4eda77c15a05c11", 
+            "email": "", 
+            "date_joined": "2010-10-25 12:22:12"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "django_oauth2.client", 
+        "fields": {
+            "name": "c", 
+            "description": "Test client.",
+            "key": "k",
+            "secret": "s",
+            "redirect_uri": "http://localhost:8000",
+            "authorized_reponse_types": 7
+        }
+    }
+]

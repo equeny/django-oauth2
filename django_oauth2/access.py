@@ -11,7 +11,7 @@ from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
     HttpResponseBadRequest, HttpResponse
 
 from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
-from django_oauth2.conf import settings as oauth2_settings
+from django_oauth2 import settings as appsettings
 from django_oauth2 import tools as oauth2_tools
 from django_oauth2 import consts as oauth2_consts
 from django_oauth2 import OAuth2Error, MissRedirectUri
@@ -121,7 +121,7 @@ class AccessTokenProvider(object):
         
         include_error = ( self.oauth_token is not None )
         
-        auth_header = 'OAuth realm="%s"' % oauth2_settings.AUTHENTICATE_REALM
+        auth_header = 'OAuth realm="%s"' % appsettings.AUTHENTICATE_REALM
         data = {}
         if include_error:
             data = [
@@ -144,7 +144,7 @@ class AccessTokenProvider(object):
         access_token = AccessToken.objects.create(self.validator.refreshable())
         data = {
             'access_token': access_token.token,
-            'expire_in': oauth2_settings.ACCESS_TOKEN_EXPIRY,
+            'expire_in': appsettings.ACCESS_TOKEN_EXPIRY,
             }
         if access_token.refresh_token:
             data['refresh_token'] = access_token.refresh_token

@@ -11,9 +11,9 @@ from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
     HttpResponseBadRequest
 
 from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
-from django_oauth2.conf import settings as oauth2_settings
+from django_oauth2 import settings as appsettings
 from django_oauth2 import tools as oauth2_tools
-from django_oauth2 import consts as oauth2_consts
+from django_oauth2 import consts as appconsts
 from django_oauth2 import OAuth2Error, MissRedirectUri
 from django_oauth2.authentication import authenticate
 from django.contrib.sites.models import Site
@@ -70,7 +70,7 @@ class Authorization(object):
         # Check client ID
         pass
 
-    def get_redirect_uri(self, request):
+    def get_redirect_uri(self, request=None):
         '''Get the redirect URI'''
         # Check if got a redirect URI
         if self.redirect_uri is None:
@@ -84,6 +84,8 @@ class Authorization(object):
         #if not self.redirect_uri.startswith('/'):
         #    # Not an absolute 
         # If not absolute, 
+        if not request:
+            raise MissRedirectUri(_('Absolute redirect_uri required.'))
         http_referer = request.META.get('HTTP_REFERER')
         if http_referer is None or not absolute_http_url_re.match(http_referer) or not self.redirect_uri.startswith('/'):
             raise MissRedirectUri(_('Absolute redirect_uri required.'))
@@ -92,10 +94,10 @@ class Authorization(object):
         split[3] = split[4] = split[5] = ''    # No parameters, query or fragment
         return urlparse.urlunparse(split)
 
-    def deny(self, request, error):
+    def deny(self, error, request=None):
         qs = {'error': error.error,
               'error_description': u'%s' % error.message or u'%s' % AUTHORIZATION_ERRORS.get(error.error),    # Handle ugettext_lazy files
-              'error_uri': '%s://%s%s' % (request.is_secure() and 'https' or 'http', Site.objects.get_current(), reverse('django_oauth2_authorize_error', kwargs={'error': error.error, })),
+              'error_uri': '%s://%s%s' % ('http', Site.objects.get_current(), reverse('django_oauth2_authorize_error', kwargs={'error': error.error, })),
               }
         if self.state is not None:
             qs['state'] = self.state
@@ -131,7 +133,7 @@ class Request(Authorization):
     def process(self):
         try: self.validate()
         except AuthorizationError, error:
-            try: return self.deny(self.request, error)
+            try: return self.deny(error, request=self.request)
             except MissRedirectUri, e:
                 return HttpResponseBadRequest(e.message)
         authorization_request = AuthorizationRequest.objects.create(self.response_type, self.client, self.redirect_uri, self.state, self.scope)
@@ -153,7 +155,8 @@ class Request(Authorization):
         if self.redirect_uri is None:
             if self.client.redirect_uri is None:
                 raise InvalidRequest(_('No redirect_uri provided or registered.'))
-        elif not self.client.match_redirect_uri(self.redirect_uri):
+        elif self.client.redirect_uri and not self.client.match_redirect_uri(self.redirect_uri):
+            self.redirect_uri = self.client.redirect_uri
             raise RedirectUriMismatch(_("Registered and provided redirect_uri doesn't match."))
         self.redirect_uri = self.redirect_uri or self.client.redirect_uri
 
@@ -162,8 +165,10 @@ class Request(Authorization):
         # Check response type
         if self.response_type is None:
             raise InvalidRequest(_('Response type required'))
-        if self.response_type not in oauth2_consts.RESPONSE_TYPES:
-            raise UnsupportedResponseType(_('No such response type: %(response_type)s') % {'response_type': self.response_type, })
+        if self.response_type not in appconsts.RESPONSE_TYPES:
+            raise InvalidRequest(_('No such response type: %(response_type)s') % {'response_type': self.response_type, })
+        if self.response_type not in appsettings.RESPONSE_TYPES:
+            raise UnsupportedResponseType(_('Response type not supported by server: %(response_type)s') % {'response_type': self.response_type, })
 
         # Response type
         if not self.client.is_authorized_response_type(self.response_type):
@@ -202,18 +207,18 @@ class GrantResponse(Response):
         qs = {}
         frag = {}
         
-        if self.response_type in [ oauth2_consts.RESPONSE_TYPE_CODE, oauth2_consts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
-            code = Code.objects.create(self.client)
+        if self.response_type in [ appconsts.RESPONSE_TYPE_CODE, appconsts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
+            code = Code.objects.create(self.client, self.redirect_uri)
             qs['code'] = code.key
             
-        if self.response_type in [ oauth2_consts.RESPONSE_TYPE_TOKEN, oauth2_consts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
+        if self.response_type in [ appconsts.RESPONSE_TYPE_TOKEN, appconsts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
             
             access_token = AccessToken.objects.create()
             
-            frag['access_token'] = access_token.key
+            frag['access_token'] = access_token.token
             
             # OPT
-            frag['expires_in'] = access_token.expire_in
+            frag['expires_in'] = appsettings.ACCESS_TOKEN_EXPIRY
             
             # OPT check if changed
             frag['scope'] = self.scope
@@ -232,7 +237,7 @@ def authorization_grant_response(authorization_request, scope):
 class DenyResponse(Response):
     
     def process(self, ):
-        return self.deny('')
+        return self.deny(AccessDenied())
         
 def authorization_deny_response(authorization_request):
     return DenyResponse(authorization_request).process()
