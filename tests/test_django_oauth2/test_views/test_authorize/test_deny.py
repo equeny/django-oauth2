@@ -1,16 +1,14 @@
 #-*- coding: utf-8 -*-
 import test_django_oauth2
 
-from django.core.urlresolvers import reverse
-
 from django_oauth2 import consts as appconsts
-from django_oauth2 import settings as appsettings
 from django_oauth2.models import Client, AuthorizationRequest
-from django_oauth2.authorize import authorization_deny_response
+from django_oauth2.views.authorize import authorization_deny_response
 
-class TestAuthorizeDeny(test_django_oauth2.TestCase):
+class TestViewsAuthorizeDeny(test_django_oauth2.TestCase):
     
     def test(self):
+        redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
             name='test',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
@@ -18,9 +16,14 @@ class TestAuthorizeDeny(test_django_oauth2.TestCase):
         r = AuthorizationRequest.objects.create(
             response_type=appconsts.RESPONSE_TYPE_TOKEN,
             client=c,
-            redirect_uri='http://www.google.fr',
+            redirect_uri=redirect_uri,
         )
-        print authorization_deny_response(r)
+        response = authorization_deny_response(r)
+        self.assertAuthorizeError(
+            response,
+            redirect_uri=redirect_uri,
+            error='access_denied',
+        )
 
 if __name__ == '__main__':
     test_django_oauth2.main()

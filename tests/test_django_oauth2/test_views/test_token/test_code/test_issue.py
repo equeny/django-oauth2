@@ -1,14 +1,14 @@
 #-*- coding: utf-8 -*-
-import test_django_oauth2
 import urllib
+
+import test_django_oauth2
 
 from django.core.urlresolvers import reverse
 
 from django_oauth2 import consts as appconsts
-from django_oauth2 import settings as appsettings
-from django_oauth2.models import Client, AccessRange, Code
+from django_oauth2.models import Client, Code
 
-class TestTokenCodeInvalid(test_django_oauth2.TestCase):
+class TestViewTokenCodeIssue(test_django_oauth2.TestCase):
     
     def process(self, data):
         return self.client.post(
@@ -34,10 +34,7 @@ class TestTokenCodeInvalid(test_django_oauth2.TestCase):
             'code': code.key,
             'redirect_uri': redirect_uri,
         }
-        self.assertTokenAccess(self.process(data))
-        
-
-    
+        self.assertTokenIssued(self.process(data))
 
 if __name__ == '__main__':
     test_django_oauth2.main()

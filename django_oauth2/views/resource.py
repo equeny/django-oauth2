@@ -1,29 +1,21 @@
 #-*- coding: utf-8 -*-
-import urllib
 import logging
-import urlparse
 
+from django import forms
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
-from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
-    HttpResponseBadRequest, HttpResponse
 
-from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
-from django_oauth2 import settings as appsettings
-from django_oauth2 import tools as oauth2_tools
-from django_oauth2 import consts as appconsts
-from django_oauth2 import OAuth2Error, MissRedirectUri
-from django_oauth2.authentication import authenticate
-from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
-
-from django.utils import simplejson
-
+from django_oauth2 import OAuth2Error
 from django_oauth2.tools import escape
-from django import forms
+from django_oauth2 import consts as appconsts
+from django_oauth2 import settings as appsettings
 from django_oauth2.tools import generate_timestamp
+from django_oauth2.models import Code, AccessToken
 
 log = logging.getLogger(__name__)
 
@@ -33,9 +25,6 @@ ACCESS_ERRORS = {
     'expired_token'     : ugettext_lazy('The access token provided has expired. Resource servers SHOULD only use this error code when the client is expected to be able to handle the response and request a new access token using the refresh token issued with the expired access token. The resource server MUST respond with the HTTP 401 (Unauthorized) status code.'),
     'insufficient_scope': ugettext_lazy('The request requires higher privileges than provided by the access token. The resource server SHOULD respond with the HTTP 403 (Forbidden) status code and MAY include the "scope" attribute with the scope necessary to access the protected resource.'),
 }
-
-
-
 
 class ResourceError(OAuth2Error):
     error = None
@@ -144,11 +133,11 @@ class AccessTokenProvider(object):
                 ('error', error.error),
                 ('error_description', u'%s' % error.message or u'%s' % ACCESS_ERRORS.get(error.error)),    # Handle ugettext_lazy files
                 ('error_uri', '%s://%s%s' % (request.is_secure() and 'https' or 'http', Site.objects.get_current(), reverse('django_oauth2_authorize_error', kwargs={'error': error.error, }))),
-                ('scope', self.scope),
+                #('scope', self.scope),
                 ]
         # Add the oauth parameters.
         for key, value in data:
-            auth_header += ', %s="%s"' % (key, escape(str(v)))
+            auth_header += ', %s="%s"' % (key, escape(str(value)))
         response = HttpResponse(status=401)
         response['WWW-Authenticate'] = auth_header
         return response

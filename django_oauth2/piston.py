@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django_oauth2.resource import AccessTokenProvider
+from django_oauth2.views.resource import AccessTokenProvider
 
 
 class OAuth2Authentication(object):

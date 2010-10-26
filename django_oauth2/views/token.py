@@ -1,25 +1,20 @@
 #-*- coding: utf-8 -*-
-import urllib
 import logging
-import urlparse
-
-#from django.shortcuts import render_to_response
-from django.template.context import RequestContext
-from django.utils.translation import ugettext as _
-from django.utils.translation import ugettext_lazy
-from django.http import absolute_http_url_re, HttpResponseRedirect, Http404,\
-    HttpResponseBadRequest, HttpResponse
-
-from django_oauth2.models import Client, Code, AccessToken, AuthorizationRequest, AccessRange
-from django_oauth2 import settings as appsettings
-from django_oauth2 import tools as oauth2_tools
-from django_oauth2 import consts as appconsts
-from django_oauth2 import OAuth2Error, MissRedirectUri
-from django_oauth2.authentication import authenticate
-from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
 
 from django.utils import simplejson
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
+from django.shortcuts import render_to_response
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy
+from django.template.context import RequestContext
+from django.http import Http404, HttpResponseBadRequest, HttpResponse
+
+from django_oauth2 import OAuth2Error
+from django_oauth2 import consts as appconsts
+from django_oauth2 import settings as appsettings
+from django_oauth2.models import Client, Code, AccessToken
+
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +47,6 @@ class UnsupportedGrantType(AccessTokenError):
 
 class InvalidScope(AccessTokenError):
     error = 'invalid_scope'
-
 
 def getvalidator(grant_type):
     return {
@@ -122,7 +116,7 @@ class AccessTokenProvider(object):
         if self.scope:
             data['scope'] = ' '.join(self.scope)
         response = HttpResponse(content=simplejson.dumps(data), content_type='application/json')
-        response['Content-Type'] = 'no-store'
+        response['Cache-Control'] = 'no-store'
         return response
 
 class AccessGrantType(object):
@@ -139,20 +133,23 @@ class AuthorizationCodeType(AccessGrantType):
     
     def __init__(self, request):
         super(AuthorizationCodeType, self).__init__(request)
-        self.codekey = self.request.POST.get('code')
+        self.code_key = self.request.POST.get('code')
         self.redirect_uri = self.request.POST.get('redirect_uri')
+        self.client_secret = self.request.POST.get('client_secret')
         self.code = None
 
     def validate(self, client):
-        if self.codekey is None:
+        if self.code_key is None:
             raise InvalidRequest(_('no code'))
-        try: self.code = Code.objects.get(key=self.codekey)
+        try: self.code = Code.objects.get(key=self.code_key)
         except Code.DoesNotExist:
-            raise InvalidGrant(_('no such code: %(code)s') % {'code': self.codekey, })
+            raise InvalidGrant(_('no such code: %(code)s') % {'code': self.code_key, })
         if self.redirect_uri is None:
             raise InvalidRequest(_('no redirect uri'))
         if not self.code.match_redirect_uri(self.redirect_uri):
             raise InvalidRequest(_("redirect_uri doesn't match"))
+        if self.client_secret != client.secret:
+            raise InvalidClient(_('client authentication failed'))
             
     def refreshable(self):
         return True

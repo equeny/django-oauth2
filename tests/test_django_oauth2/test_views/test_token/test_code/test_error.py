@@ -1,14 +1,14 @@
 #-*- coding: utf-8 -*-
-import test_django_oauth2
 import urllib
+
+import test_django_oauth2
 
 from django.core.urlresolvers import reverse
 
 from django_oauth2 import consts as appconsts
-from django_oauth2 import settings as appsettings
-from django_oauth2.models import Client, AccessRange, Code
+from django_oauth2.models import Client, Code
 
-class TestTokenCodeInvalid(test_django_oauth2.TestCase):
+class TestViewTokenCodeError(test_django_oauth2.TestCase):
     
     def process(self, data, post=True, content_type='application/x-www-form-urlencoded'):
         if post:
@@ -20,7 +20,7 @@ class TestTokenCodeInvalid(test_django_oauth2.TestCase):
         else:
             return self.client.get(
                 reverse('django_oauth2_token'),
-                data=urllib.urlencode(data)
+                data=data
             )
 
     def test_get(self):
@@ -141,7 +141,7 @@ class TestTokenCodeInvalid(test_django_oauth2.TestCase):
             name='test',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
-        code = Code.objects.create(
+        Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
         )
@@ -159,7 +159,7 @@ class TestTokenCodeInvalid(test_django_oauth2.TestCase):
             name='test',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
-        code = Code.objects.create(
+        Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
         )
@@ -245,8 +245,6 @@ class TestTokenCodeInvalid(test_django_oauth2.TestCase):
             'redirect_uri': redirect_uri,
         }
         self.assertTokenError(self.process(data), error='invalid_request')
-
-    
 
 if __name__ == '__main__':
     test_django_oauth2.main()

@@ -38,6 +38,7 @@ setup(
         'South==0.7.2',
     ],
     tests_require = [
+        'coverage>=3.4',
         'Nosango>=0.1.0',               
     ],
     extras_require = {

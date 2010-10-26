@@ -15,7 +15,7 @@ CODE_EXPIRY = getattr(settings, 'OAUTH2_CODE_EXPIRY', 120)
 
 ACCESS_TOKEN_EXPIRY = getattr(settings, 'OAUTH2_ACCESS_TOKEN_EXPIRY', 3600)
 
-AUTHENTICATION_BACKEND = getattr(settings, 'OAUTH2_AUTHENTICATION_BACKEND', 'django_oauth2.authentication.core.Backend')
+AUTHENTICATION_BACKEND = getattr(settings, 'OAUTH2_AUTHENTICATION_BACKEND', appconsts.AUTHENTICATION_BACKEND_CORE)
 
 AUTHORIZATION_ERRORS_VIEW = getattr(settings, 'OAUTH2_AUTHORIZATION_ERRORS_VIEW', 'django_oauth2_authorization_errors')
 

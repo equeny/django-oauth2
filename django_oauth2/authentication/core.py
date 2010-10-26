@@ -18,7 +18,7 @@ from django.views.decorators.cache import never_cache
 
 from django.contrib.auth import forms as auth_form
 
-from django_oauth2.authorize import authorization_grant_response,\
+from django_oauth2.views.authorize import authorization_grant_response,\
     authorization_deny_response
 
 from django.contrib.auth.views import login

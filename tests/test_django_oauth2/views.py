@@ -5,4 +5,4 @@ from django_oauth2.decorators import resource
 
 @resource
 def handle(request):
-    return HttpResponse('ok')
+    return HttpResponse('success')
