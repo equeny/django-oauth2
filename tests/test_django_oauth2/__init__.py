@@ -3,6 +3,8 @@ import os
 import sys
 import nose
 import urlparse
+try: from urlparse import parse_qs
+except ImportError: from cgi import parse_qs
 
 import nosango.cases
 
@@ -29,7 +31,7 @@ class TestCase(nosango.cases.TestCase):
     def assertAuthorizeError(self, response, redirect_uri, error, error_description=None, error_uri=None, state=None):
         self.assertEquals(302, response.status_code)
         location_parts = self.assertRedirectUri(response, redirect_uri)
-        location_qs = urlparse.parse_qs(location_parts.query)
+        location_qs = parse_qs(location_parts.query)
         self.assertEquals('', location_parts.fragment)
         for key in location_qs.keys():
             self.assertTrue(key in ['error', 'error_description', 'error_uri', 'state'])
@@ -59,11 +61,11 @@ class TestCase(nosango.cases.TestCase):
         self.assertEquals(redirect_uri_parts.path, location_parts.path)
         self.assertEquals('', location_parts.params)
         #if isinstance(qs, dict):
-        #    location_qs = urlparse.parse_qs(location_parts.query)
+        #    location_qs = parse_qs(location_parts.query)
         #    self.assertEquals(self.dict_to_doseq(qs), location_qs)
         #else: self.assertEquals(qs, location_parts.query)
         #if isinstance(frag, dict):
-        #    location_frag = urlparse.parse_qs(location_parts.fragment)
+        #    location_frag = parse_qs(location_parts.fragment)
         #    self.assertEquals(self.dict_to_doseq(frag), location_frag)
         #else: self.assertEquals(frag, location_parts.fragment)
         return location_parts
@@ -78,7 +80,7 @@ class TestCase(nosango.cases.TestCase):
         self.assertEquals(302, response.status_code)
         location_parts = self.assertRedirectUri(response, redirect_uri)
         self.assertEquals('', location_parts.fragment)
-        location_qs = urlparse.parse_qs(location_parts.query)
+        location_qs = parse_qs(location_parts.query)
         self.assertTrue(location_qs.has_key('code'))
         self.assertEquals([code, ], location_qs['code'])
     
@@ -86,17 +88,17 @@ class TestCase(nosango.cases.TestCase):
         self.assertEquals(302, response.status_code)
         location_parts = self.assertRedirectUri(response, redirect_uri)
         self.assertEquals('', location_parts.query)
-        location_frag = urlparse.parse_qs(location_parts.fragment)
+        location_frag = parse_qs(location_parts.fragment)
         self.assertTrue(location_frag.has_key('access_token'))
         self.assertEquals([access_token, ], location_frag['access_token'])
     
     def assertAuthorizeGrantCodeToken(self, response, redirect_uri, code, access_token):
         self.assertEquals(302, response.status_code)
         location_parts = self.assertRedirectUri(response, redirect_uri)
-        location_qs = urlparse.parse_qs(location_parts.query)
+        location_qs = parse_qs(location_parts.query)
         self.assertTrue(location_qs.has_key('code'))
         self.assertEquals([code, ], location_qs['code'])
-        location_frag = urlparse.parse_qs(location_parts.fragment)
+        location_frag = parse_qs(location_parts.fragment)
         self.assertTrue(location_frag.has_key('access_token'))
         self.assertEquals([access_token, ], location_frag['access_token'])
 
