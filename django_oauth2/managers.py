@@ -46,7 +46,7 @@ class AuthorizationRequestManager(models.Manager):
 
 class CodeManager(models.Manager):
 
-    def create(self, client, redirect_uri, scope=None):
+    def create(self, user, client, redirect_uri, scope=None):
         key = generate_unique_key(
             self.model,
             key_length=appconst.CODE_KEY_LENGTH,
@@ -58,13 +58,14 @@ class CodeManager(models.Manager):
             timestamp = generate_timestamp(),
             redirect_uri = redirect_uri,
             scope = scope,
+            user = user,
             )
         code.save()
         return code
 
 class AccessTokenManager(models.Manager):
 
-    def create(self, refreshable=True):
+    def create(self, user, refreshable=True):
         token = generate_unique_key(
             self.model,
             key_length=appconst.ACCESS_TOKEN_LENGTH,
@@ -81,6 +82,7 @@ class AccessTokenManager(models.Manager):
             token = token,
             refresh_token = refresh_token,
             timestamp = generate_timestamp(),
+            user = user,
             )
         access_token.save()
         return access_token

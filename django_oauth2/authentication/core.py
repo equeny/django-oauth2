@@ -32,7 +32,7 @@ class Backend(IBackend):
             return handle_login_request(request, authorization_request_key=authorization_request.key)
         #if True:
         #    return handle_scope_request(request, authorization_request_key=authorization_request.key)
-        return authorization_grant_response(authorization_request, '')
+        return authorization_grant_response(authorization_request, user, '')
 
 STEP_LOGIN = 'login'
 STEP_SCOPE = 'scope'
@@ -94,7 +94,7 @@ def handle_login_response(request):
                 AuthorizationRequest,
                 key=form.cleaned_data.get('authorization_request_key')
             )
-            return authorization_grant_response(authorization_request, '')
+            return authorization_grant_response(authorization_request, request.user, '')
         return handle_scope_request(request, form.cleaned_data.get('authorization_request_key'))
     return generate_login_page(request, form)
 
@@ -122,7 +122,7 @@ def handle_scope_response(request):
         status = form.cleaned_data.get('status')
         scope = form.cleaned_data.get('scope')
         if status == STATUS_GRANT:
-            return authorization_grant_response(authorization_request, scope)
+            return authorization_grant_response(authorization_request, request.user, scope)
         return authorization_deny_response(authorization_request)
     return generate_scope_page(request, form, authorization_request)
 

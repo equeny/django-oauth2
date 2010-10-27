@@ -32,6 +32,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -51,6 +52,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -70,6 +72,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'client_id': c.key,
@@ -88,6 +91,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': 'foobar',
@@ -107,6 +111,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -125,6 +130,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -144,6 +150,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -162,6 +169,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -181,6 +189,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -199,6 +208,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -218,6 +228,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,
@@ -236,6 +247,7 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,

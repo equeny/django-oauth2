@@ -61,11 +61,12 @@ class AccessToken(models.Model):
     token = models.CharField(max_length=appconsts.ACCESS_TOKEN_LENGTH)
     refresh_token = models.CharField(blank=True, null=True, max_length=appconsts.REFRESH_TOKEN_LENGTH)
     timestamp = models.PositiveIntegerField()
+    user = models.ForeignKey(User, related_name='access_tokens')
 
-class ClientUser(models.Model):
-    client = models.ForeignKey(Client)
-    user = models.ForeignKey(User)
-    scope = models.ManyToManyField(AccessRange)
+#class ClientUser(models.Model):
+#    client = models.ForeignKey(Client)
+#    user = models.ForeignKey(User)
+#    scope = models.ManyToManyField(AccessRange)
 
 class Code(models.Model):
     objects = CodeManager()
@@ -75,6 +76,7 @@ class Code(models.Model):
     timestamp = models.PositiveIntegerField()
     redirect_uri = models.URLField(null=True, blank=True)
     scope = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(User, related_name='codes')
 
     def match_redirect_uri(self, redirect_uri):
         return normalize_redirect_uri(redirect_uri) == normalize_redirect_uri(self.redirect_uri)

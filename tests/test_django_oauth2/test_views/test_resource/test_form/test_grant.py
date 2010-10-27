@@ -16,7 +16,11 @@ class TestViewsResourceFormGrant(test_django_oauth2.TestCase):
             return self.client.get(reverse('resource'), qs)
 
     def test(self):
-        access_token = AccessToken.objects.create(refreshable=True)
+        user = self.getuser()
+        access_token = AccessToken.objects.create(
+            user=user,
+            refreshable=True,
+        )
         response = self.process({'oauth_token': access_token.token, })
         self.assertEquals(200, response.status_code)
         self.assertEquals('success', response.content)

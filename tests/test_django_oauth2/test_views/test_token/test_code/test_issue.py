@@ -26,6 +26,7 @@ class TestViewTokenCodeIssue(test_django_oauth2.TestCase):
         code = Code.objects.create(
             client=c,
             redirect_uri=redirect_uri,
+            user=self.getuser(),
         )
         data = {
             'grant_type': appconsts.ACCESS_GRANT_TYPE_AUTHORIZATION_CODE,

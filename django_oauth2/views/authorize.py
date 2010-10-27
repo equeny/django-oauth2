@@ -202,18 +202,25 @@ class Response(Authorization):
 
 class GrantResponse(Response):
     
-    def process(self, scope):
+    def process(self, user, scope):
 
         qs = {}
         frag = {}
         
         if self.response_type in [ appconsts.RESPONSE_TYPE_CODE, appconsts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
-            code = Code.objects.create(self.client, self.redirect_uri)
+            code = Code.objects.create(
+                user=user, 
+                client=self.client,
+                redirect_uri=self.redirect_uri
+            )
             qs['code'] = code.key
             
         if self.response_type in [ appconsts.RESPONSE_TYPE_TOKEN, appconsts.RESPONSE_TYPE_CODE_AND_TOKEN ]:
             
-            access_token = AccessToken.objects.create()
+            access_token = AccessToken.objects.create(
+                user=user,
+                refreshable=False
+            )
             
             frag['access_token'] = access_token.token
             
@@ -231,8 +238,8 @@ class GrantResponse(Response):
         parts[5] = urllib.urlencode(frag, doseq=True)
         return HttpResponseRedirect(urlparse.urlunparse(parts))
 
-def authorization_grant_response(authorization_request, scope):
-    return GrantResponse(authorization_request).process(scope)
+def authorization_grant_response(authorization_request, user, scope):
+    return GrantResponse(authorization_request).process(user, scope)
 
 class DenyResponse(Response):
     

@@ -116,7 +116,7 @@ def handle_scope_response(request):
         status = form.cleaned_data.get('status')
         scope = form.cleaned_data.get('scope')
         if status == STATUS_GRANT:
-            return authorization_grant_response(authorization_request, scope)
+            return authorization_grant_response(authorization_request, request.user, scope)
         return authorization_deny_response(authorization_request)
     return generate_scope_page(request, form, authorization_request)
 

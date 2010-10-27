@@ -106,7 +106,10 @@ class AccessTokenProvider(object):
         try: self.validate()
         except AccessTokenError, error:
             return self.deny(self.request, error)
-        access_token = AccessToken.objects.create(self.validator.refreshable())
+        access_token = AccessToken.objects.create(
+            user=self.validator.getuser(),
+            refreshable=self.validator.refreshable()
+        )
         data = {
             'access_token': access_token.token,
             'expire_in': appsettings.ACCESS_TOKEN_EXPIRY,
@@ -127,7 +130,9 @@ class AccessGrantType(object):
     def process(self):
         raise NotImplementedError
     def refreshable(self):
-        pass
+        raise NotImplementedError
+    def getuser(self):
+        raise NotImplementedError
 
 class AuthorizationCodeType(AccessGrantType):
     
@@ -153,6 +158,9 @@ class AuthorizationCodeType(AccessGrantType):
             
     def refreshable(self):
         return True
+
+    def getuser(self):
+        return self.code.user
 
 #class ResourceOwnerPasswordCredentials(AccessToken):
 #    

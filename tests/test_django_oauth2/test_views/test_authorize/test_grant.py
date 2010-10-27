@@ -18,7 +18,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
             client=c,
             redirect_uri=redirect_uri,
         )
-        response = authorization_grant_response(r, 'foobar')
+        user = self.getuser()
+        response = authorization_grant_response(r, user, 'foobar')
         self.assertAuthorizeGrantToken(
             response,
             redirect_uri,
@@ -36,7 +37,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
             client=c,
             redirect_uri=redirect_uri,
         )
-        response = authorization_grant_response(r, 'foobar')
+        user = self.getuser()
+        response = authorization_grant_response(r, user, 'foobar')
         self.assertAuthorizeGrantCode(
             response,
             redirect_uri,
@@ -54,7 +56,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
             client=c,
             redirect_uri=redirect_uri,
         )
-        response = authorization_grant_response(r, 'foobar')
+        user = self.getuser()
+        response = authorization_grant_response(r, user, 'foobar')
         self.assertAuthorizeGrantCodeToken(
             response,
             redirect_uri,

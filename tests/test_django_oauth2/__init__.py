@@ -10,8 +10,8 @@ import nosango.cases
 
 import django.test.client
 from django.utils import simplejson
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django_oauth2.views.authorize import authorization_grant_response
 
 # Absolute folder of this file
 FOLDER = os.path.dirname(os.path.abspath(__file__))
@@ -128,6 +128,9 @@ class TestCase(nosango.cases.TestCase):
 #            self.assertTrue(data.has_key('error_uri'))
 #            self.assertEquals(error_description, data['error_uri'])
         
+    
+    def getuser(self):
+        return User.objects.create_user('test', 'test@shiningpanda.com', '[test]')
      
 def main():
     '''Run test'''
