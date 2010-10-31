@@ -20,7 +20,8 @@ class TestViewTokenCodeIssue(test_django_oauth2.TestCase):
     def test_invalid_content_type(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(

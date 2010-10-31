@@ -68,7 +68,7 @@ class AccessTokenProvider(object):
         except AccessToken.DoesNotExist:
             raise InvalidToken(_('The access token provided is invalid.'))
         
-        if access_token.timestamp < generate_timestamp() - appsettings.ACCESS_TOKEN_EXPIRY:
+        if access_token.expire < generate_timestamp():
             raise ExpiredToken(_('The access token provided has expired.'))
 
     def analyze_header(self):
@@ -99,7 +99,7 @@ class AccessTokenProvider(object):
     def analyze_query(self):
         if self.request.GET.get('oauth_signature_method') is not None:
             raise
-        token = self.request.GET.get('oauth_token')
+        token = self.request.GET.get(appconsts.OAUTH_TOKEN)
         #if token is None:
         #    raise
         #TODO: check the last one
@@ -117,10 +117,11 @@ class AccessTokenProvider(object):
 
     def analyze_body(self):
         class OAuthTokenForm(forms.Form):
+            #TODO use appconsts
             oauth_token = forms.CharField(required=True)
         form = OAuthTokenForm(self.request.POST)
         if form.is_valid():
-            return form.cleaned_data['oauth_token']
+            return form.cleaned_data[appconsts.OAUTH_TOKEN]
 
     def deny(self, request, error):
         

@@ -3,31 +3,28 @@ from django.contrib.auth.models import User
 
 from django_oauth2 import settings as appsettings
 from django_oauth2 import consts as appconst
-from django_oauth2.tools import generate_unique_key_secret, generate_unique_key, generate_timestamp
+from django_oauth2.tools import generate_unique_key, generate_timestamp
 
 class ClientManager(models.Manager):
     
-    def create(self, name, authorized_reponse_types, description=None, redirect_uri=None):
-        key, secret = generate_unique_key_secret(
-            self.model,
-            key_length=appconst.CLIENT_KEY_LENGTH,
-            secret_length=appconst.CLIENT_SECRET_LENGTH,
-            )
+    def create(self, key, name, authorized_reponse_types, secret=None, description=None, redirect_uri=None):
         client = self.model(
+            key=key,
             name=name,
             description=description,
-            key=key,
-            secret=secret,
             redirect_uri=redirect_uri,
-            #user=user,
             )
         client.authorize_response_types(*authorized_reponse_types)
+        if secret:
+            client.set_secret(secret)
+        else:
+            client.set_unusable_secret()
         client.save()
         return client
 
 class AuthorizationRequestManager(models.Manager):
     
-    def create(self, response_type, client, redirect_uri=None, state=None, scope=None):
+    def create(self, response_type, client, redirect_uri=None, state=None, scope=None, expire=None):
         key = generate_unique_key(
             self.model,
             key_length=appconst.AUTHORIZATION_REQUEST_KEY_LENGTH,
@@ -38,7 +35,7 @@ class AuthorizationRequestManager(models.Manager):
             client = client,
             redirect_uri = redirect_uri,
             state = state,
-            timestamp = generate_timestamp(),
+            expire = expire or generate_timestamp(appsettings.AUTHORIZATION_REQUEST_EXPIRY),
             #scope = ' '.join(scope),
             )
         authorization_request.save()
@@ -46,7 +43,7 @@ class AuthorizationRequestManager(models.Manager):
 
 class CodeManager(models.Manager):
 
-    def create(self, user, client, redirect_uri, scope=None):
+    def create(self, user, client, redirect_uri, scope=None, expire=None):
         key = generate_unique_key(
             self.model,
             key_length=appconst.CODE_KEY_LENGTH,
@@ -55,9 +52,9 @@ class CodeManager(models.Manager):
             key = key,
             client = client,
             active=True,
-            timestamp = generate_timestamp(),
+            expire = expire or generate_timestamp(appsettings.CODE_EXPIRY),
             redirect_uri = redirect_uri,
-            scope = scope,
+            #scope = scope,
             user = user,
             )
         code.save()
@@ -65,7 +62,7 @@ class CodeManager(models.Manager):
 
 class AccessTokenManager(models.Manager):
 
-    def create(self, user, refreshable=True):
+    def create(self, user, client, refreshable=False, expire=None):
         token = generate_unique_key(
             self.model,
             key_length=appconst.ACCESS_TOKEN_LENGTH,
@@ -81,7 +78,8 @@ class AccessTokenManager(models.Manager):
         access_token = self.model(
             token = token,
             refresh_token = refresh_token,
-            timestamp = generate_timestamp(),
+            expire = expire or generate_timestamp(appsettings.ACCESS_TOKEN_EXPIRY),
+            client=client,
             user = user,
             )
         access_token.save()

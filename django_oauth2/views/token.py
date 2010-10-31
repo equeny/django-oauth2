@@ -108,6 +108,7 @@ class AccessTokenProvider(object):
             return self.deny(self.request, error)
         access_token = AccessToken.objects.create(
             user=self.validator.getuser(),
+            client=self.client,
             refreshable=self.validator.refreshable()
         )
         data = {

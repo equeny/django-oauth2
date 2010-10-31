@@ -5,7 +5,8 @@ import test_django_oauth2
 
 from django.core.urlresolvers import reverse
 
-from django_oauth2.models import AccessToken
+from django_oauth2 import consts as appconsts
+from django_oauth2.models import AccessToken, Client
 
 class TestViewsResourceFormGrant(test_django_oauth2.TestCase):
     
@@ -17,8 +18,14 @@ class TestViewsResourceFormGrant(test_django_oauth2.TestCase):
 
     def test(self):
         user = self.getuser()
+        c = Client.objects.create(
+            key='test',
+            name='test client',
+            authorized_reponse_types=appconsts.RESPONSE_TYPES
+        )
         access_token = AccessToken.objects.create(
             user=user,
+            client=c,
             refreshable=True,
         )
         response = self.process({'oauth_token': access_token.token, })

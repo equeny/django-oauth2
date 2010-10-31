@@ -136,7 +136,13 @@ class Request(Authorization):
             try: return self.deny(error, request=self.request)
             except MissRedirectUri, e:
                 return HttpResponseBadRequest(e.message)
-        authorization_request = AuthorizationRequest.objects.create(self.response_type, self.client, self.redirect_uri, self.state, self.scope)
+        authorization_request = AuthorizationRequest.objects.create(
+            response_type=self.response_type,
+            client=self.client,
+            redirect_uri=self.redirect_uri,
+            state=self.state,
+            scope=self.scope
+        )
         return authenticate(self.request, authorization_request)
 
     def validate(self):
@@ -211,7 +217,8 @@ class GrantResponse(Response):
             code = Code.objects.create(
                 user=user, 
                 client=self.client,
-                redirect_uri=self.redirect_uri
+                redirect_uri=self.redirect_uri,
+                scope=self.scope,
             )
             qs['code'] = code.key
             
@@ -219,6 +226,7 @@ class GrantResponse(Response):
             
             access_token = AccessToken.objects.create(
                 user=user,
+                client=self.client,
                 refreshable=False
             )
             

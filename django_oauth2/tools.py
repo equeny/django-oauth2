@@ -4,15 +4,6 @@ import urllib
 import urlparse
 from random import choice
 
-from django.db.models import Q
-
-def generate_unique_key_secret(klass, key_length, secret_length, key_field='key', secret_field='secret'):
-    while True:
-        key_value = generate_key(length=key_length)
-        secret_value = generate_key(length=secret_length)
-        if not klass.objects.filter(Q(**{key_field: key_value, }) | Q(**{secret_field: secret_value})).count():
-            return key_value, secret_value
-
 def generate_unique_key(klass, key_length, key_field='key'):
     while True:
         key_value = generate_key(length=key_length)
@@ -36,5 +27,5 @@ def normalize_redirect_uri(uri):
 def escape(s):
     return urllib.quote(s, safe='~')
 
-def generate_timestamp():
-    return int(time.time())
+def generate_timestamp(future=0):
+    return int(time.time()) + future

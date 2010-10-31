@@ -26,7 +26,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_get(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -46,7 +47,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_content_type(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -66,7 +68,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_no_grant_type(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -85,7 +88,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_grant_type(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -105,7 +109,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_no_client_id(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -124,7 +129,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_client_id(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -144,7 +150,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_no_code(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         Code.objects.create(
@@ -163,7 +170,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_code(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         Code.objects.create(
@@ -183,7 +191,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_no_redirect_uri(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -202,7 +211,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_redirect_uri(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -222,7 +232,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_no_client_secret(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(
@@ -241,7 +252,8 @@ class TestViewTokenCodeError(test_django_oauth2.TestCase):
     def test_invalid_client_secret(self):
         redirect_uri='http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES
         )
         code = Code.objects.create(

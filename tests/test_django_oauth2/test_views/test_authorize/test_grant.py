@@ -10,7 +10,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
     def test_token(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         r = AuthorizationRequest.objects.create(
@@ -29,7 +30,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
     def test_code(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         r = AuthorizationRequest.objects.create(
@@ -48,7 +50,8 @@ class TestViewsAuthorizeGrant(test_django_oauth2.TestCase):
     def test_code_and_token(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         r = AuthorizationRequest.objects.create(

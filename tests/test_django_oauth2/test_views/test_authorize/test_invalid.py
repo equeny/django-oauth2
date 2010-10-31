@@ -15,7 +15,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_no_response_type(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         data = {
@@ -31,7 +32,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_invalid_response_type(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         data = {
@@ -48,7 +50,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_unsupported_response_type(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         backup = appsettings.RESPONSE_TYPES
@@ -82,7 +85,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_invalid_client_id(self):
         redirect_uri = 'http://www.google.fr'
         Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         data = {
@@ -98,7 +102,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
 
     def test_no_redirect_uri(self):
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         data = {
@@ -112,7 +117,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_redirect_uri_mismatch(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
             redirect_uri=redirect_uri,
         )
@@ -129,7 +135,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
 
     def test_relative_redirect_uri(self):
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=appconsts.RESPONSE_TYPES,
         )
         data = {
@@ -144,7 +151,8 @@ class TestViewsAuthorizeInvalid(test_django_oauth2.TestCase):
     def test_unauthorized_client(self):
         redirect_uri = 'http://www.google.fr'
         c = Client.objects.create(
-            name='test',
+            key='test',
+            name='test client',
             authorized_reponse_types=(appconsts.RESPONSE_TYPE_TOKEN, ),
         )
         data = {
