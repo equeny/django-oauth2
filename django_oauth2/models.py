@@ -1,17 +1,24 @@
 #-*- coding: utf-8 -*-
-import random
-
 from django.db import models
-from django.contrib.auth import models as auth_models
+from django.utils.encoding import smart_str
+from django.contrib.auth.models import User
+from django.utils.hashcompat import sha_constructor
 from django.utils.translation import ugettext_lazy as _
 
-
-
+from django_oauth2 import managers
 from django_oauth2 import consts as appconsts
-from django_oauth2.managers import ClientManager, CodeManager, AccessTokenManager, AccessRangeManager, AuthorizationRequestManager
 from django_oauth2.tools import normalize_redirect_uri, generate_unique_key
 from django_oauth2.db.fields import TimestampField, CreationTimestampField
 
+UNUSABLE_SECRET = '!' # This will never be a valid hash
+
+def get_hexdigest(algorithm, salt, raw_secret):
+    raw_secret, salt = smart_str(raw_secret), smart_str(salt)
+    if algorithm == 'ssha':
+        import base64
+        raw_salt = base64.b16decode(str.upper(salt))
+        return sha_constructor(raw_secret + raw_salt).hexdigest()
+    raise ValueError('Got unknown password algorithm type in password.')
 
 class Client(models.Model):
     
@@ -25,7 +32,7 @@ class Client(models.Model):
     
     #user = models.ForeignKey(User, null=True, blank=True, related_name='clients')
     authorized_reponse_types = models.PositiveIntegerField(choices=appconsts.AUTHORIZED_RESPONSE_TYPE_CHOICES, default=0)
-    objects = ClientManager()
+    objects = managers.ClientManager()
 
     def match_redirect_uri(self, redirect_uri):
         return normalize_redirect_uri(redirect_uri) == normalize_redirect_uri(self.redirect_uri)
@@ -39,20 +46,22 @@ class Client(models.Model):
             bit |= appconsts.RESPONSE_TYPE_BITS.get(response_type, 0)
         self.authorized_reponse_types = bit
 
-    def set_secret(self, raw_password):
-        algo = 'sha1'
-        salt = auth_models.get_hexdigest(algo, str(random.random()), str(random.random()))[:5]
-        hsh = auth_models.get_hexdigest(algo, salt, raw_password)
-        self.password = '%s$%s$%s' % (algo, salt, hsh)
+    def set_secret(self, raw_secret):
+        import os, base64
+        algo = 'ssha'
+        salt = str.lower(base64.b16encode(os.urandom(4)))
+        hsh = get_hexdigest(algo, salt, raw_secret)
+        self.secret = '%s$%s$%s' % (algo, salt, hsh)
 
     def check_secret(self, raw_secret):
-        return auth_models.check_password(raw_secret, self.secret)
+        algo, salt, hsh = self.secret.split('$')
+        return hsh == get_hexdigest(algo, salt, raw_secret)
 
     def set_unusable_secret(self):
-        self.secret = auth_models.UNUSABLE_PASSWORD
+        self.secret = UNUSABLE_SECRET
 
     def has_usable_secret(self):
-        return self.secret != auth_models.UNUSABLE_PASSWORD
+        return self.secret != UNUSABLE_SECRET
 
 
 def getenerate_client_key():
@@ -63,7 +72,7 @@ class AccessRange(models.Model):
     key = models.CharField(unique=True, max_length=256)
     description = models.TextField(blank=True)
     
-    objects = AccessRangeManager()
+    objects = managers.AccessRangeManager()
 
     def __unicode__(self):
         return self.key
@@ -80,16 +89,16 @@ class AuthorizationRequest(models.Model):
     
     client = models.ForeignKey(Client)
     
-    objects = AuthorizationRequestManager()
+    objects = managers.AuthorizationRequestManager()
 
 class AccessToken(models.Model):
-    objects = AccessTokenManager()
+    objects = managers.AccessTokenManager()
     token = models.CharField(max_length=appconsts.ACCESS_TOKEN_LENGTH)
     refresh_token = models.CharField(blank=True, null=True, max_length=appconsts.REFRESH_TOKEN_LENGTH)
     issue = CreationTimestampField()
     expire = TimestampField()
     client = models.ForeignKey(Client)
-    user = models.ForeignKey(auth_models.User, related_name='access_tokens')
+    user = models.ForeignKey(User, related_name='access_tokens')
 
 #class ClientUser(models.Model):
 #    client = models.ForeignKey(Client)
@@ -97,7 +106,7 @@ class AccessToken(models.Model):
 #    scope = models.ManyToManyField(AccessRange)
 
 class Code(models.Model):
-    objects = CodeManager()
+    objects = managers.CodeManager()
     key = models.CharField(max_length=appconsts.AUTHORIZATION_REQUEST_KEY_LENGTH)
     active = models.BooleanField(default=True)
     client = models.ForeignKey(Client)
@@ -106,7 +115,7 @@ class Code(models.Model):
     redirect_uri = models.URLField(null=True, blank=True)
     scope = models.TextField(null=True, blank=True)
     client = models.ForeignKey(Client)
-    user = models.ForeignKey(auth_models.User, related_name='codes')
+    user = models.ForeignKey(User, related_name='codes')
 
     def match_redirect_uri(self, redirect_uri):
         return normalize_redirect_uri(redirect_uri) == normalize_redirect_uri(self.redirect_uri)

@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 from django_oauth2 import settings as appsettings
 from django_oauth2 import consts as appconst
