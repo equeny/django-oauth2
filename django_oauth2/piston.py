@@ -10,7 +10,10 @@ class OAuth2Authentication(object):
     def is_authenticated(self, request):
         return AccessTokenProvider(request).process() is None
         
-    def challenge(self):
+    def challenge(self, request=None):
+        '''
+        Would be nice to get request object.
+        '''
         resp = HttpResponse("Authorization Required")
         resp['WWW-Authenticate'] = 'OAuth realm="foobar"'
         resp.status_code = 401
