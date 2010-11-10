@@ -69,7 +69,7 @@ def getenerate_client_key():
 
 class AccessRange(models.Model):
     
-    key = models.CharField(unique=True, max_length=256)
+    key = models.CharField(unique=True, max_length=255) # 255 max. when unique with mysql
     description = models.TextField(blank=True)
     
     objects = managers.AccessRangeManager()
