@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
 from django.template.context import RequestContext
 from django.http import Http404, HttpResponseBadRequest, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from django_oauth2 import OAuth2Error
 from django_oauth2 import consts as appconsts
@@ -192,6 +193,7 @@ def handle_error(request, error):
     # Render the form
     return render_to_response('django_oauth2/access_token/error.html', context_instance=RequestContext(request, context))
 
+@csrf_exempt
 def handle_access_token(request):
     return AccessTokenProvider(request).process()
     
